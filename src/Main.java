@@ -47,8 +47,16 @@ public class Main {
             }
 
             if (command.matches("^[a-h]\\d[a-h]\\d") && !forceMode) {
+                String move;
                 board.movePiece(command);
-                writer.println(board.getPawnMove(playing));
+                move = board.getPawnMove(playing);
+
+                if (move.equals("resign")) {
+                    writer.println(move);
+                    //return;
+                } else {
+                    writer.println("move " + move);
+                }
             }
             writer.flush();
         }

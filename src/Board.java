@@ -179,7 +179,7 @@ public class Board {
             }
 
         }
-        return "";
+        return "resign";
     }
 
 }

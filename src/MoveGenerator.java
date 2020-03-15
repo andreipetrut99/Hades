@@ -16,9 +16,9 @@ public class MoveGenerator {
 
     public String getMove(int current, int next) {
         char letter = (char) (96 + (current % 10));
-        String move = "" + letter + (current / 10 - 1);
+        String move = "" + letter + (10 - (current / 10));
         letter = (char) (96 + (next % 10));
-        move = move + letter + (next / 10 - 1);
+        move = move + letter + (10 - (next / 10));
 
         return move;
     }

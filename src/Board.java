@@ -1,9 +1,12 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Board {
     private static Board instance = null;
     private List<Integer> board;
+    private MoveGenerator moveGenerator = MoveGenerator.getInstance();
+
 
     private Board() {
         board = new ArrayList<Integer>(120);
@@ -119,6 +122,64 @@ public class Board {
                 System.out.println("");
             }
         }
+    }
+
+    public void movePiece(String move) {
+        int current, next;
+        int char1 = Integer.parseInt(String.valueOf(move.charAt(1)));
+        int char3 = Integer.parseInt(String.valueOf(move.charAt(3)));
+        current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
+        // next = (8 - move.charAt(3)) * 10 + (move.charAt(2) - 96);
+        next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
+        next = current - next;
+
+        board.set(next, board.get(current));
+        board.set(current, Constants.E);
+    }
+
+    public String getPawnMove(String playing) {
+        int increment = 0;
+        int pos = 0;
+        String move;
+        if (playing.equals("white")) {
+            increment = -10;
+            pos = board.indexOf(Constants.wP);
+        } else if (playing.equals("black")) {
+            increment = 10;
+            pos = board.indexOf(Constants.bP);
+        }
+
+        if (pos == -1) {
+            return "resign";
+        }
+
+        if (board.get(pos + increment ) == 0) {
+            move = moveGenerator.getMove(pos, pos + increment);
+            movePiece(move);
+            return move;
+        } else {
+            if (playing.equals("white") && (pos + increment - 1 > 6)) {
+                move = moveGenerator.getMove(pos, pos + increment - 1);
+                movePiece(move);
+                return move;
+            } else if (playing.equals("white") && (pos + increment + 1 > 6)) {
+                move = moveGenerator.getMove(pos, pos + increment + 1);
+                movePiece(move);
+                return move;
+            }
+
+            if (playing.equals("black") && (pos + increment - 1 <= 6) && (pos + increment - 1 > 0)) {
+                move = moveGenerator.getMove(pos, pos + increment - 1);
+                movePiece(move);
+                return move;
+            } else if (playing.equals("black") && (pos + increment + 1 <= 6) && (pos + increment - 1 > 0)) {
+                move = moveGenerator.getMove(pos, pos + increment + 1);
+                movePiece(move);
+                return move;
+            }
+
+        }
+        return "";
     }
 
 }

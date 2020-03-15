@@ -3,33 +3,54 @@ import java.io.*;
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        Writer writer = new PrintWriter(System.out);
+        PrintWriter writer = new PrintWriter(System.out);
 
         Board board = Board.getInstance();
         String command;
         boolean forceMode = false;
-
+        String onMove = "white", mode;
+        String playing = "black";
+        writer.flush();
         while (true) {
             command = reader.readLine();
-
-            if (command.equals("xboard")) {
-                board.initializeBoard();
-                writer.write("feature myname=\"Miracle Chess 0.9\" done=1");
+            switch (command) {
+                case "xboard":
+                    mode = "xboard";
+                    writer.println("feature myname=\"Hades 1.0\" sigint=0 done=1");
+                    break;
+                case "new":
+                    board.initializeBoard();
+                    forceMode = false;
+                    playing = "black";
+                    onMove = "white";
+                    break;
+                case "force":
+                    forceMode = true;
+                    break;
+                case "go":
+                    forceMode = false;
+                    playing = onMove;
+                    break;
+                case "white":
+                    onMove = "white";
+                    playing = "black";
+                    break;
+                case "black":
+                    onMove = "black";
+                    playing = "white";
+                    break;
+                case "quit":
+                    return;
+                case "print":
+                    board.printBoard();
+                    break;
             }
 
-            if (command.equals("new")) {
-                board.initializeBoard();
+            if (command.matches("^[a-h]\\d[a-h]\\d") && !forceMode) {
+                board.movePiece(command);
+                writer.println(board.getPawnMove(playing));
             }
-
-            if (command.equals("quit")) {
-                break;
-            }
-
-            if (command.equals("force")) {
-                forceMode = true;
-            }
-
-
+            writer.flush();
         }
     }
 }

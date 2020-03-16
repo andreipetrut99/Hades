@@ -11,18 +11,16 @@ CLASSES = \
 		Main.java \
 		MoveGenerator.java
 
-default: build
+default: build run clean
 
 build: $(CLASSES:.java=.class)
-		jar cfm Etapa1.jar MANIFEST.MF *.class
-		java -jar Etapa1.jar
+		jar cfm Hades.jar MANIFEST.MF *.class
 		#cp Etapa1.jar /mnt/c/WinBoard-4.8.0/Winboard
 		#cd /mnt/c/WinBoard-4.8.0/Winboard
 		#./winboard.exe -debug -fcp "java -jar ./Etapa1.jar"
-		#java -jar Etapa1.jar
-		#java -classpath /mnt/c/Users/Eduard\ Păunoiu/Desktop/Hades-master/src/Etapa1.jar Main
+	
+run: 
+	java -jar Hades.jar
 
-#run: 	jar cfm Etapa1.jar MANIFEST.MF *.class
-#		java -jar Etapa1.jar
-
-clean: $(RM) $*.class
+clean: 
+	$(RM) *.class

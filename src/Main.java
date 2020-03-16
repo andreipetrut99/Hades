@@ -68,6 +68,10 @@ public class Main {
                 board.movePiece(command);
             }
 
+            if (command.matches("[a-h]\\d[a-h]\\d[q]")) {
+                writer.write("resign");
+            }
+
             writer.flush();
         }
     }

@@ -6,6 +6,7 @@ public class Board {
     private static Board instance = null;
     private List<Integer> board;
     private MoveGenerator moveGenerator = MoveGenerator.getInstance();
+    private boolean checked = false;
 
 
     private Board() {
@@ -141,10 +142,10 @@ public class Board {
         int increment = 0;
         int pos = 0;
         String move;
-        if (playing.equals("white")) {
+        if (playing.equals("white") && !checked) {
             increment = -10;
             pos = board.indexOf(Constants.wP);
-        } else if (playing.equals("black")) {
+        } else if (playing.equals("black") && !checked) {
             increment = 10;
             pos = board.indexOf(Constants.bP);
         }
@@ -158,28 +159,37 @@ public class Board {
             movePiece(move);
             return move;
         } else {
-            if (playing.equals("white") && (pos + increment - 1 > 6)) {
+            if (playing.equals("white") && board.get(pos + increment - 1) > 6) {
                 move = moveGenerator.getMove(pos, pos + increment - 1);
                 movePiece(move);
                 return move;
-            } else if (playing.equals("white") && (pos + increment + 1 > 6)) {
+            } else if (playing.equals("white") && board.get(pos + increment + 1) > 6) {
                 move = moveGenerator.getMove(pos, pos + increment + 1);
                 movePiece(move);
                 return move;
             }
 
-            if (playing.equals("black") && (pos + increment - 1 <= 6) && (pos + increment - 1 > 0)) {
+            if (playing.equals("black") && board.get(pos + increment - 1) <= 6 && board.get(pos + increment - 1) > 0) {
                 move = moveGenerator.getMove(pos, pos + increment - 1);
                 movePiece(move);
                 return move;
-            } else if (playing.equals("black") && (pos + increment + 1 <= 6) && (pos + increment - 1 > 0)) {
+            } else if (playing.equals("black") && board.get(pos + increment + 1) <= 6 && board.get(pos + increment + 1) > 0) {
                 move = moveGenerator.getMove(pos, pos + increment + 1);
                 movePiece(move);
                 return move;
             }
 
         }
-        return "resign";
+        int prevPos = pos;
+        board.set(pos, -1);
+        String nextMove = getPawnMove(playing);
+
+        if (playing.equals("white")) {
+            board.set(pos, Constants.wP);
+        } else {
+            board.set(pos, Constants.bP);
+        }
+        return nextMove;
     }
 
 }

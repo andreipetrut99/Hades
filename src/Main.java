@@ -46,9 +46,11 @@ public class Main {
                     break;
             }
 
-            if (command.matches("^[a-h]\\d[a-h]\\d") && !forceMode) {
+            if ((command.matches("^[a-h]\\d[a-h]\\d") && !forceMode) || command.equals("go")) {
                 String move;
-                board.movePiece(command);
+                if (!command.equals("go")) {
+                    board.movePiece(command);
+                }
                 move = board.getPawnMove(playing);
 
                 if (move.equals("resign")) {
@@ -57,7 +59,15 @@ public class Main {
                 } else {
                     writer.println("move " + move);
                 }
+            } else if (command.matches("^[a-h]\\d[a-h]\\d") && forceMode) {
+                if (onMove.equals("white")) {
+                    onMove = "black";
+                } else {
+                    onMove = "white";
+                }
+                board.movePiece(command);
             }
+
             writer.flush();
         }
     }

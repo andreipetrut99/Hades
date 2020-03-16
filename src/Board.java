@@ -169,11 +169,13 @@ public class Board {
                 return move;
             }
 
-            if (playing.equals("black") && board.get(pos + increment - 1) <= 6 && board.get(pos + increment - 1) > 0) {
+            if (playing.equals("black") && board.get(pos + increment - 1) <= 6
+                    && board.get(pos + increment - 1) > 0) {
                 move = moveGenerator.getMove(pos, pos + increment - 1);
                 movePiece(move);
                 return move;
-            } else if (playing.equals("black") && board.get(pos + increment + 1) <= 6 && board.get(pos + increment + 1) > 0) {
+            } else if (playing.equals("black") && board.get(pos + increment + 1) <= 6
+                    && board.get(pos + increment + 1) > 0) {
                 move = moveGenerator.getMove(pos, pos + increment + 1);
                 movePiece(move);
                 return move;

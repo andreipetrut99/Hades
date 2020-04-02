@@ -4,24 +4,60 @@ public class Engine {
     private static Engine instance = null;
     private ArrayList<String> previousMoves;
     private Board board;
+    private MoveGenerator moveGenerator;
+    private String bestMove;
 
     private Engine() {
         initializeEngine();
     }
 
 
-    private String getBestWhiteMove(int minIndex) {
+
+    private String getBestMove(String playingColor) {
+        bestMove = "";
+        if (playingColor.equals("black")) {
+          //  return getBestBlackMove(21, 0);
+        } else {
+          //  return getBestWhiteMove(21, 1);
+        }
+    }
+
+    private int getBestWhiteMove(int minIndex, int depth) {
+        if (depth == Constants.SEARCH_DEPTH) {
+            return evaluateBoard();
+        }
         int maximumScore = Integer.MIN_VALUE;
+
         for (int i = minIndex; i < 99; i++) {
             int piece = board.getPiece(i);
             if (board.isWhite(i)) {
                 int[] availableMoves;
+                int k = 0;
+
                 availableMoves = getAvailableMoves(piece, i);
+                assert availableMoves != null;
+                int nextMove = availableMoves[k];
+
+                while (nextMove != -1) {
+                    board.movePiece(i, nextMove);
+
+                    int score = -getBestBlackMove(21, depth + 1);
+
+                    if (score > maximumScore) {
+                        maximumScore = score;
+                        if (depth == 0) {
+                            bestMove = moveGenerator.getMove(i, nextMove);
+                        }
+                    }
+
+                    board.movePiece(nextMove, i);
+                }
             }
         }
+        return maximumScore;
     }
 
-    private String getBestBlackMove(int minIndex) {
+    private int getBestBlackMove(int minIndex, int depth) {
 
     }
 
@@ -30,41 +66,160 @@ public class Engine {
             return getPawnMoves(piece, index);
         }
         if ((piece == Constants.wK) || (piece == Constants.bK)) {
-            return getKingMoves(index);
+            return getKingMoves(piece, index);
         }
         if ((piece == Constants.wQ) || (piece == Constants.bQ)) {
-            return getQueenMoves(index);
+            return getQueenMoves(piece, index);
         }
         if ((piece == Constants.wN) || (piece == Constants.bN)) {
-            return getKnightMoves(index);
+            return getKnightMoves(piece, index);
         }
         if ((piece == Constants.wB) || (piece == Constants.bB)) {
-            return getBishopMoves(index);
+            return getBishopMoves(piece, index);
         }
         if ((piece == Constants.wR) || (piece == Constants.bR)) {
-            return getRoockMoves(index);
+            return getRoockMoves(piece, index);
         }
         return null;
     }
 
-    private int[] getRoockMoves(int index) {
-        return new int[2];
+    private int[] getRoockMoves(int piece, int index) {
+        int[] moves = new int[1];
+        moves[0] = -1;
+        return moves;
     }
 
-    private int[] getBishopMoves(int index) {
-        return new int[2];
+    private int[] getBishopMoves(int piece, int index) {
+        int[] moves = new int[1];
+        moves[0] = -1;
+        return moves;
     }
 
-    private int[] getKnightMoves(int index) {
-        return new int[2];
+    private int[] getKnightMoves(int piece, int index) {
+        int[] moves = new int[5];
+        int possibleMoves = 0;
+        int increment = 20;
+
+        if (piece == Constants.wK) {
+            if (board.isBlack(index - increment - 1)
+                    || board.isEmpty(index - increment - 1)) {
+                moves[possibleMoves] = index - increment - 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index - increment + 1)
+                    || board.isEmpty(index - increment + 1)) {
+                moves[possibleMoves] = index - increment + 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index + increment - 1)
+                    || board.isEmpty(index + increment - 1)) {
+                moves[possibleMoves] = index + increment - 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index + increment + 1)
+                    || board.isEmpty(index + increment + 1)) {
+                moves[possibleMoves] = index + increment + 1;
+                possibleMoves += 1;
+            }
+            moves[possibleMoves] = -1;
+        }
     }
 
-    private int[] getQueenMoves(int index) {
-        return new int[2];
+    private int[] getQueenMoves(int piece, int index) {
+        int[] moves = new int[1];
+        moves[0] = -1;
+        return moves;
     }
 
-    private int[] getKingMoves(int index) {
-        return new int[2];
+    private int[] getKingMoves(int piece, int index) {
+        int[] moves = new int[9];
+        int possibleMoves = 0;
+        int increment = 10;
+        if (piece == Constants.wK) {
+            if (board.isBlack(index - increment - 1)
+                    || board.isEmpty(index - increment - 1)) {
+                moves[possibleMoves] = index - increment - 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index - increment)
+                    || board.isEmpty(index - increment)) {
+                moves[possibleMoves] = index - increment;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index - increment + 1)
+                    || board.isEmpty(index - increment + 1)) {
+                moves[possibleMoves] = index - increment + 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index - 1)
+                    || board.isEmpty(index - 1)) {
+                moves[possibleMoves] = index - 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index + 1)
+                    || board.isEmpty(index + 1)) {
+                moves[possibleMoves] = index + 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index + increment - 1)
+                    || board.isEmpty(index + increment - 1)) {
+                moves[possibleMoves] = index + increment - 1;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index + increment)
+                    || board.isEmpty(index + increment)) {
+                moves[possibleMoves] = index + increment;
+                possibleMoves += 1;
+            }
+            if (board.isBlack(index + increment + 1)
+                    || board.isEmpty(index + increment + 1)) {
+                moves[possibleMoves] = index + increment + 1;
+                possibleMoves += 1;
+            }
+        } else {
+            if (board.isWhite(index - increment - 1)
+                    || board.isEmpty(index - increment - 1)) {
+                moves[possibleMoves] = index - increment - 1;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index - increment)
+                    || board.isEmpty(index - increment)) {
+                moves[possibleMoves] = index - increment;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index - increment + 1)
+                    || board.isEmpty(index - increment + 1)) {
+                moves[possibleMoves] = index - increment + 1;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index - 1)
+                    || board.isEmpty(index - 1)) {
+                moves[possibleMoves] = index - 1;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index + 1)
+                    || board.isEmpty(index + 1)) {
+                moves[possibleMoves] = index + 1;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index + increment - 1)
+                    || board.isEmpty(index + increment - 1)) {
+                moves[possibleMoves] = index + increment - 1;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index + increment)
+                    || board.isEmpty(index + increment)) {
+                moves[possibleMoves] = index + increment;
+                possibleMoves += 1;
+            }
+            if (board.isWhite(index + increment + 1)
+                    || board.isEmpty(index + increment + 1)) {
+                moves[possibleMoves] = index + increment + 1;
+                possibleMoves += 1;
+            }
+        }
+        moves[possibleMoves] = -1;
+        return moves;
     }
 
     private int[] getPawnMoves(int piece, int index) {
@@ -110,17 +265,10 @@ public class Engine {
         return moves;
     }
 
-    private String getBestMove(String playingColor) {
-        if (playingColor.equals("black")) {
-            return getBestBlackMove(21);
-        } else {
-            return getBestWhiteMove(21);
-        }
-    }
-
     private void initializeEngine() {
         previousMoves = new ArrayList<>();
         board = Board.getInstance();
+        moveGenerator = MoveGenerator.getInstance();
     }
 
     public static Engine getInstance() {

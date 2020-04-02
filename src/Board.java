@@ -2,19 +2,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Board {
+class Board {
     private static Board instance = null;
     private List<Integer> board;
     private MoveGenerator moveGenerator = MoveGenerator.getInstance();
     private boolean checked = false;
 
-
     private Board() {
         board = new ArrayList<Integer>(120);
     }
-    
-    
-    public void initializeBoard() {
+
+    void initializeBoard() {
         board.clear();
         // initialize all places with 0 - free
         for (int i = 0; i < 120; i++) {
@@ -64,7 +62,7 @@ public class Board {
         }
     }
 
-    public static Board getInstance() {
+    static Board getInstance() {
         if (instance == null) {
             instance = new Board();
             return instance;
@@ -72,7 +70,7 @@ public class Board {
         return instance;
     }
 
-    public void printBoard() {
+    void printBoard() {
         int k = 0;
         for (int i = 21; i < 99; i++) {
             switch (board.get(i)) {
@@ -113,7 +111,7 @@ public class Board {
                     System.out.print(" wK ");
                     break;
                 case Constants.bK:
-                    System.out.print(" bK");
+                    System.out.print(" bK ");
                     break;
             }
             k++;
@@ -125,12 +123,11 @@ public class Board {
         }
     }
 
-    public void movePiece(String move) {
+    void movePiece(String move) {
         int current, next;
         int char1 = Integer.parseInt(String.valueOf(move.charAt(1)));
         int char3 = Integer.parseInt(String.valueOf(move.charAt(3)));
         current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
-        // next = (8 - move.charAt(3)) * 10 + (move.charAt(2) - 96);
         next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
         next = current - next;
 
@@ -138,10 +135,16 @@ public class Board {
         board.set(current, Constants.E);
     }
 
-    public String getPawnMove(String playing) {
+    void movePiece(int current, int next) {
+        board.set(next, board.get(current));
+        board.set(current, Constants.E);
+    }
+
+   /* String getPawnMove(String playing) {
         int increment = 0;
         int pos = 0;
         String move;
+
         if (playing.equals("white") && !checked) {
             increment = -10;
             pos = board.indexOf(Constants.wP);
@@ -180,9 +183,8 @@ public class Board {
                 movePiece(move);
                 return move;
             }
-
         }
-        int prevPos = pos;
+
         board.set(pos, -1);
         String nextMove = getPawnMove(playing);
 
@@ -193,5 +195,21 @@ public class Board {
         }
         return nextMove;
     }
+        */
 
+   public int getPiece(int index) {
+       return board.get(index);
+   }
+
+   public boolean isWhite(int index) {
+       return board.get(index) > 0 && board.get(index) < 7;
+   }
+
+   public boolean isEmpty(int index) {
+       return board.get(index) == Constants.E;
+   }
+
+   public boolean isBlack(int index) {
+       return board.get(index) > 6 && board.get(index) < 13;
+   }
 }

@@ -212,4 +212,28 @@ class Board {
    public boolean isBlack(int index) {
        return board.get(index) > 6 && board.get(index) < 13;
    }
+
+   public boolean isPawn(int index) {
+       return (board.get(index) == Constants.wP) || (board.get(index) == Constants.bP);
+   }
+
+    public boolean isRoock(int index) {
+        return (board.get(index) == Constants.wR) || (board.get(index) == Constants.bR);
+    }
+
+    public boolean isBishop(int index) {
+        return (board.get(index) == Constants.wB) || (board.get(index) == Constants.bB);
+    }
+
+    public boolean isKnight(int index) {
+        return (board.get(index) == Constants.wN) || (board.get(index) == Constants.bN);
+    }
+
+    public boolean isQueen(int index) {
+        return (board.get(index) == Constants.wQ) || (board.get(index) == Constants.bQ);
+    }
+
+    public boolean isKing(int index) {
+        return (board.get(index) == Constants.wK) || (board.get(index) == Constants.bK);
+    }
 }

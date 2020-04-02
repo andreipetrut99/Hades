@@ -5,17 +5,13 @@ public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter writer = new PrintWriter(System.out);
-
-        EvaluationBoard evaluationBoard = EvaluationBoard.getInstance();
-        System.out.println(evaluationBoard.getBishopPoints(21));
-        System.out.println(evaluationBoard.getBishopPoints(25));
-        System.out.println(evaluationBoard.getKingPoints(33));
-
+        Engine engine = Engine.getInstance();
         Board board = Board.getInstance();
+
         String command;
         boolean forceMode = false;
         String onMove = "white", mode;
-        String playing = "black";
+        String playingColor = "black";
         writer.flush();
         while (true) {
             command = reader.readLine();
@@ -27,7 +23,7 @@ public class Main {
                 case "new":
                     board.initializeBoard();
                     forceMode = false;
-                    playing = "black";
+                    playingColor = "black";
                     onMove = "white";
                     break;
                 case "force":
@@ -35,15 +31,15 @@ public class Main {
                     break;
                 case "go":
                     forceMode = false;
-                    playing = onMove;
+                    playingColor = onMove;
                     break;
                 case "white":
                     onMove = "white";
-                    playing = "black";
+                    playingColor = "black";
                     break;
                 case "black":
                     onMove = "black";
-                    playing = "white";
+                    playingColor = "white";
                     break;
                 case "quit":
                     return;
@@ -57,13 +53,16 @@ public class Main {
                 if (!command.equals("go")) {
                     board.movePiece(command);
                 }
-                // move = board.getPawnMove(playing);
-
+                // move = board.getPawnMove(playingColor)
                 /*if (move.equals("resign")) {
                     writer.println(move);
                 } else {
                     writer.println("move " + move);
                 } */
+                move = engine.getBestMove(playingColor);
+                board.movePiece(move);
+                writer.println("move " + move);
+
             } else if (command.matches("^[a-h]\\d[a-h]\\d") && forceMode) {
                 if (onMove.equals("white")) {
                     onMove = "black";

@@ -6,6 +6,7 @@ public class Engine {
     private Board board;
     private MoveGenerator moveGenerator;
     private String bestMove;
+    private EvaluationBoard evaluationEngine;
 
     private Engine() {
         initializeEngine();
@@ -13,22 +14,23 @@ public class Engine {
 
 
 
-    private String getBestMove(String playingColor) {
+    public String getBestMove(String playingColor) {
         bestMove = "";
         if (playingColor.equals("black")) {
-          //  return getBestBlackMove(21, 0);
+          getBestBlackMove(0);
         } else {
-          //  return getBestWhiteMove(21, 1);
+          getBestWhiteMove(0);
         }
+        return bestMove;
     }
 
-    private int getBestWhiteMove(int minIndex, int depth) {
+    private int getBestWhiteMove(int depth) {
         if (depth == Constants.SEARCH_DEPTH) {
-            return evaluateBoard();
+            return evaluationEngine.evaluateBoard(board, false);
         }
         int maximumScore = Integer.MIN_VALUE;
 
-        for (int i = minIndex; i < 99; i++) {
+        for (int i = 21; i < 99; i++) {
             int piece = board.getPiece(i);
             if (board.isWhite(i)) {
                 int[] availableMoves;
@@ -41,7 +43,7 @@ public class Engine {
                 while (nextMove != -1) {
                     board.movePiece(i, nextMove);
 
-                    int score = -getBestBlackMove(21, depth + 1);
+                    int score = -getBestBlackMove( depth + 1);
 
                     if (score > maximumScore) {
                         maximumScore = score;
@@ -51,46 +53,80 @@ public class Engine {
                     }
 
                     board.movePiece(nextMove, i);
+                    nextMove = availableMoves[++k];
                 }
             }
         }
         return maximumScore;
     }
 
-    private int getBestBlackMove(int minIndex, int depth) {
+    private int getBestBlackMove(int depth) {
+        if (depth == Constants.SEARCH_DEPTH) {
+            return evaluationEngine.evaluateBoard(board, true);
+        }
 
+        int maximumScore = Integer.MIN_VALUE;
+
+        for (int i = 21; i < 99; i++) {
+            int piece = board.getPiece(i);
+            if (board.isBlack(i)) {
+                int[] availableMoves;
+                int k = 0;
+
+                availableMoves = getAvailableMoves(piece, i);
+                assert availableMoves != null;
+                int nextMove = availableMoves[k];
+
+                while (nextMove != -1) {
+                    board.movePiece(i, nextMove);
+
+                    int score = -getBestWhiteMove( depth + 1);
+
+                    if (score > maximumScore) {
+                        maximumScore = score;
+                        if (depth == 0) {
+                            bestMove = moveGenerator.getMove(i, nextMove);
+                        }
+                    }
+
+                    board.movePiece(nextMove, i);
+                    nextMove = availableMoves[++k];
+                }
+            }
+        }
+        return maximumScore;
     }
 
     private int[] getAvailableMoves(int piece, int index) {
-        if ((piece == Constants.wP) || (piece == Constants.bP)) {
+        if (board.isPawn(index)) {
             return getPawnMoves(piece, index);
         }
-        if ((piece == Constants.wK) || (piece == Constants.bK)) {
+        if (board.isKing(index)) {
             return getKingMoves(piece, index);
         }
-        if ((piece == Constants.wQ) || (piece == Constants.bQ)) {
+        if (board.isQueen(index)) {
             return getQueenMoves(piece, index);
         }
-        if ((piece == Constants.wN) || (piece == Constants.bN)) {
+        if (board.isKnight(index)) {
             return getKnightMoves(piece, index);
         }
-        if ((piece == Constants.wB) || (piece == Constants.bB)) {
+        if (board.isBishop(index)) {
             return getBishopMoves(piece, index);
         }
-        if ((piece == Constants.wR) || (piece == Constants.bR)) {
+        if (board.isRoock(index)) {
             return getRoockMoves(piece, index);
         }
         return null;
     }
 
     private int[] getRoockMoves(int piece, int index) {
-        int[] moves = new int[1];
+        int[] moves = new int[2];
         moves[0] = -1;
         return moves;
     }
 
     private int[] getBishopMoves(int piece, int index) {
-        int[] moves = new int[1];
+        int[] moves = new int[2];
         moves[0] = -1;
         return moves;
     }
@@ -121,8 +157,10 @@ public class Engine {
                 moves[possibleMoves] = index + increment + 1;
                 possibleMoves += 1;
             }
-            moves[possibleMoves] = -1;
         }
+        moves[possibleMoves] = -1;
+        //todo: implement for black king
+        return moves;
     }
 
     private int[] getQueenMoves(int piece, int index) {
@@ -225,13 +263,13 @@ public class Engine {
     private int[] getPawnMoves(int piece, int index) {
         int[] moves = new int[5];
         int possibleMoves = 0;
-        int increment = 0;
+        int increment;
         if (piece == Constants.wP) {
             increment = -10;
         } else {
             increment = 10;
         }
-
+        //todo: incepere cu doua casute
         if (board.getPiece(index + increment) == Constants.E) {
             moves[possibleMoves] = index + increment;
             possibleMoves += 1;
@@ -269,6 +307,7 @@ public class Engine {
         previousMoves = new ArrayList<>();
         board = Board.getInstance();
         moveGenerator = MoveGenerator.getInstance();
+        evaluationEngine = EvaluationBoard.getInstance();
     }
 
     public static Engine getInstance() {

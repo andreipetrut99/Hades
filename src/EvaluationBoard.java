@@ -27,6 +27,41 @@ public class EvaluationBoard {
         }
         return instance;
     }
+    
+    public int evaluateBoard(Board board, boolean evaluateBlack) {
+        int score = 0;
+        int k = 0;
+        int p = 1;
+
+        if (evaluateBlack) {
+            k = 119;
+            p = -1;
+        }
+
+        for (int i = 21; i < 99; i++) {
+            if (evaluateBlack ? board.isBlack(i) : board.isWhite(i)) {
+                if (board.isPawn(i)) {
+                    score += getPawnPoints(k + (p * i));
+                }
+                if (board.isRoock(i)) {
+                    score += getRoockPoints(k + (p * i));
+                }
+                if (board.isBishop(i)) {
+                    score += getBishopPoints(k + (p * i));
+                }
+                if (board.isKnight(i)) {
+                    score += getKnightPoints(k + (p * i));
+                }
+                if (board.isQueen(i)) {
+                    score += getQueenPoints(k + (p * i));
+                }
+                if (board.isKing(i)) {
+                    score += getKingPoints(k + (p * i));
+                }
+            }
+        }
+        return score;
+    }
 
     public int getKnightPoints(int index) {
         return knightPoints.get(index);

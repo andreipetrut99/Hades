@@ -5,8 +5,7 @@ import java.util.List;
 class Board {
     private static Board instance = null;
     private List<Integer> board;
-    private MoveGenerator moveGenerator = MoveGenerator.getInstance();
-    private boolean checked = false;
+    private boolean isBlackOnTop;
 
     private Board() {
         board = new ArrayList<Integer>(120);
@@ -124,15 +123,20 @@ class Board {
     }
 
     void movePiece(String move) {
-        int current, next;
-        int char1 = Integer.parseInt(String.valueOf(move.charAt(1)));
-        int char3 = Integer.parseInt(String.valueOf(move.charAt(3)));
-        current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
-        next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
-        next = current - next;
+        try {
+            int current, next;
+            int char1 = Integer.parseInt(String.valueOf(move.charAt(1)));
+            int char3 = Integer.parseInt(String.valueOf(move.charAt(3)));
+            current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
+            next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
+            next = current - next;
 
-        board.set(next, board.get(current));
-        board.set(current, Constants.E);
+            board.set(next, board.get(current));
+            board.set(current, Constants.E);
+        } catch (StringIndexOutOfBoundsException e) {
+            System.out.println(move);
+            e.printStackTrace();
+        }
     }
 
     void movePiece(int current, int next) {
@@ -140,66 +144,27 @@ class Board {
         board.set(current, Constants.E);
     }
 
-   /* String getPawnMove(String playing) {
-        int increment = 0;
-        int pos = 0;
-        String move;
-
-        if (playing.equals("white") && !checked) {
-            increment = -10;
-            pos = board.indexOf(Constants.wP);
-        } else if (playing.equals("black") && !checked) {
-            increment = 10;
-            pos = board.indexOf(Constants.bP);
-        }
-
-        if (pos == -1) {
-            return "resign";
-        }
-
-        if (board.get(pos + increment ) == 0) {
-            move = moveGenerator.getMove(pos, pos + increment);
-            movePiece(move);
-            return move;
-        } else {
-            if (playing.equals("white") && board.get(pos + increment - 1) > 6) {
-                move = moveGenerator.getMove(pos, pos + increment - 1);
-                movePiece(move);
-                return move;
-            } else if (playing.equals("white") && board.get(pos + increment + 1) > 6) {
-                move = moveGenerator.getMove(pos, pos + increment + 1);
-                movePiece(move);
-                return move;
-            }
-
-            if (playing.equals("black") && board.get(pos + increment - 1) <= 6
-                    && board.get(pos + increment - 1) > 0) {
-                move = moveGenerator.getMove(pos, pos + increment - 1);
-                movePiece(move);
-                return move;
-            } else if (playing.equals("black") && board.get(pos + increment + 1) <= 6
-                    && board.get(pos + increment + 1) > 0) {
-                move = moveGenerator.getMove(pos, pos + increment + 1);
-                movePiece(move);
-                return move;
-            }
-        }
-
-        board.set(pos, -1);
-        String nextMove = getPawnMove(playing);
-
-        if (playing.equals("white")) {
-            board.set(pos, Constants.wP);
-        } else {
-            board.set(pos, Constants.bP);
-        }
-        return nextMove;
+    void setPiece(int index, int piece) {
+        board.set(index, piece);
     }
-        */
+
+    void moveBack(int current, int next) {
+        int aux = next;
+        board.set(next, board.get(current));
+        board.set(current, board.get(aux));
+    }
 
    public int getPiece(int index) {
        return board.get(index);
    }
+
+    public boolean isBlackOnTop() {
+        return isBlackOnTop;
+    }
+
+    public void setBlackOnTop(boolean blackOnTop) {
+        isBlackOnTop = blackOnTop;
+    }
 
    public boolean isWhite(int index) {
        return board.get(index) > 0 && board.get(index) < 7;

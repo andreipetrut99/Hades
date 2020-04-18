@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -60,8 +59,12 @@ public class Main {
                     writer.println("move " + move);
                 } */
                 move = engine.getBestMove(playingColor);
-                board.movePiece(move);
-                writer.println("move " + move);
+                if (move.equals("resign")) {
+                    writer.println(move);
+                } else {
+                    board.movePiece(move);
+                    writer.println("move " + move);
+                }
 
             } else if (command.matches("^[a-h]\\d[a-h]\\d") && forceMode) {
                 if (onMove.equals("white")) {

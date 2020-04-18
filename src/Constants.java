@@ -13,6 +13,6 @@ public class Constants {
     public static final int bB = 10;
     public static final int bN = 11;
     public static final int bP = 12;
-    public static final int SEARCH_DEPTH = 2;
+    public static final int SEARCH_DEPTH = 4;
 
 }

@@ -9,6 +9,7 @@ CLASSES = \
 		Board.java \
 		Constants.java \
 		Main.java \
+        StateVariables.java \
 		MoveGenerator.java
 
 default: build run clean

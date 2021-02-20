@@ -1,0 +1,17 @@
+https://www.chessprogramming.org/Simplified_Evaluation_Function
+
+https://chess.stackexchange.com/questions/2831/how-to-represent-chess-state-with-a-bitboard
+
+
+---getNextWhiteValidMove(int index) // plecand de la indexul dat 
+---getNextBlackValidMove(int index)
+	---if i : pawn then
+	---if i : knight then etc.
+
+
+
+
+
+---setmove
+---undo move
+---pastMoves

@@ -8,74 +8,34 @@ public class Engine {
     private MoveGenerator moveGenerator;
     private String bestMove;
     private EvaluationBoard evaluationEngine;
-    PrintWriter writer = new PrintWriter(System.out);
 
     private Engine() {
         initializeEngine();
     }
 
-
-
     public String getBestMove(String playingColor) {
         bestMove = "resign";
         if (playingColor.equals("black")) {
-          getBestBlackMove(0);
+          getBestMove(0, true);
         } else {
-          getBestWhiteMove(0);
+          getBestMove(0, false);
         }
         return bestMove;
     }
 
-    private int getBestWhiteMove(int depth) {
+    private int getBestMove(int depth, boolean playingBlack) {
         if (depth == Constants.SEARCH_DEPTH) {
-            return evaluationEngine.evaluateBoard(board, false);
-        }
-        int maximumScore = Integer.MIN_VALUE;
-
-        for (int i = 21; i < 99; i++) {
-            int piece = board.getPiece(i);
-            if (board.isWhite(i)) {
-                int[] availableMoves;
-                int k = 0;
-
-                availableMoves = getAvailableMoves(piece, i);
-                assert availableMoves != null;
-                int nextMove = availableMoves[k];
-
-                while (nextMove != -1) {
-                    int piece1 = board.getPiece(i);
-                    int piece2 = board.getPiece(nextMove);
-                    board.movePiece(i, nextMove);
-
-                    int score = -getBestBlackMove( depth + 1);
-
-                    if (score > maximumScore) {
-                        maximumScore = score;
-                        if (depth == 0) {
-                            bestMove = moveGenerator.getMove(i, nextMove);
-                        }
-                    }
-
-                    // undo prev move
-                    board.setPiece(i, piece1);
-                    board.setPiece(nextMove, piece2);
-                    nextMove = availableMoves[++k];
-                }
+            if (playingBlack) {
+                return evaluationEngine.evaluateBoard(board, true);
+            } else {
+                return evaluationEngine.evaluateBoard(board, false);
             }
         }
-        return maximumScore;
-    }
-
-    private int getBestBlackMove(int depth) {
-        if (depth == Constants.SEARCH_DEPTH) {
-            return evaluationEngine.evaluateBoard(board, true);
-        }
-
         int maximumScore = Integer.MIN_VALUE;
 
         for (int i = 21; i < 99; i++) {
             int piece = board.getPiece(i);
-            if (board.isBlack(i)) {
+            if (playingBlack ? board.isBlack(i) : board.isWhite(i)) {
                 int[] availableMoves;
                 int k = 0;
 
@@ -84,13 +44,16 @@ public class Engine {
                 int nextMove = availableMoves[k];
 
                 while (nextMove != -1) {
-                    int piece1, piece2;
-                    piece1 = board.getPiece(i);
-                    piece2 = board.getPiece(nextMove);
-
+                    ArrayList<Integer> auxBoard = new ArrayList<>(board.getBoard());
+                    StateVariables st = new StateVariables(board.getStateVariables());
                     board.movePiece(i, nextMove);
 
-                    int score = -getBestWhiteMove( depth + 1);
+                    int score;
+                    if (playingBlack) {
+                        score = -getBestMove(depth + 1, false);
+                    } else {
+                        score = -getBestMove(depth + 1, true);
+                    }
 
                     if (score > maximumScore) {
                         maximumScore = score;
@@ -100,9 +63,8 @@ public class Engine {
                     }
 
                     // undo prev move
-                    board.setPiece(i, piece1);
-                    board.setPiece(nextMove, piece2);
-
+                    board.setBoard(auxBoard);
+                    board.setStateVariables(st);
                     nextMove = availableMoves[++k];
                 }
             }
@@ -203,11 +165,14 @@ public class Engine {
         return i;
     }
 
-    private int[] getBishopMoves(int piece, int index) {
+    public int[] getBishopMoves(int piece, int index) {
         int[] moves = new int[15];
         int possibleMoves = 0;
 
         for (int i = index - 11; i > 20; i -= 11) {
+            if (board.getPiece(i) == -1) {
+                break;
+            }
             int nextMove = checkValidMove(piece, i);
             if (nextMove == -1) {
                 break;
@@ -219,7 +184,10 @@ public class Engine {
             }
         }
 
-        for (int i = index - 9; i > 20 ; i -= 11) {
+        for (int i = index - 9; i > 21 ; i -= 11) {
+            if (board.getPiece(i) == -1) {
+                break;
+            }
             int nextMove = checkValidMove(piece, i);
             if (nextMove == -1) {
                 break;
@@ -231,7 +199,10 @@ public class Engine {
             }
         }
 
-        for (int i = index + 9; i <99; i += 9) {
+        for (int i = index + 9; i < 98; i += 9) {
+            if (board.getPiece(i) == -1) {
+                break;
+            }
             int nextMove = checkValidMove(piece, i);
             if (nextMove == -1) {
                 break;
@@ -243,7 +214,10 @@ public class Engine {
             }
         }
 
-        for (int i = index + 11; i <99; i += 11) {
+        for (int i = index + 11; i < 99; i += 11) {
+            if (board.getPiece(i) == -1) {
+                break;
+            }
             int nextMove = checkValidMove(piece, i);
             if (nextMove == -1) {
                 break;
@@ -254,7 +228,6 @@ public class Engine {
                 moves[possibleMoves++] = nextMove;
             }
         }
-
         moves[possibleMoves] = -1;
         return moves;
     }
@@ -331,6 +304,11 @@ public class Engine {
         int possibleMoves = 0;
         int increment = 10;
         if (piece == Constants.wK) {
+            int lCastling = tryLCastling(false);
+            if (lCastling != -1) {
+                moves[possibleMoves++] = lCastling;
+            }
+
             if (board.isBlack(index - increment - 1)
                     || board.isEmpty(index - increment - 1)) {
                 moves[possibleMoves] = index - increment - 1;
@@ -372,6 +350,10 @@ public class Engine {
                 possibleMoves += 1;
             }
         } else {
+            int lCastling = tryLCastling(true);
+            if (lCastling != -1) {
+                moves[possibleMoves++] = lCastling;
+            }
             if (board.isWhite(index - increment - 1)
                     || board.isEmpty(index - increment - 1)) {
                 moves[possibleMoves] = index - increment - 1;
@@ -414,8 +396,6 @@ public class Engine {
             }
         }
         moves[possibleMoves] = -1;
-        moves = new int[1];
-        moves[0] = -1;
         return moves;
     }
 
@@ -429,7 +409,6 @@ public class Engine {
             increment = 10;
         }
 
-        //todo: incepere cu doua casute
         if (board.isEmpty(index + increment)) {
             moves[possibleMoves] = index + increment;
             possibleMoves += 1;
@@ -467,10 +446,24 @@ public class Engine {
             }
         }
 
-        //todo: enpassant
-
         moves[possibleMoves] = -1;
         return moves;
+    }
+
+    private int tryLCastling(boolean isBlack) {
+        if (isBlack && board.isKingsFirstMove(true)
+                && board.isRoocksFirstMove(true, false)
+                && board.isEmpty(26)
+                && board.isEmpty(27)) {
+            return 28;
+        }
+        if (!isBlack && board.isKingsFirstMove(false)
+                && board.isRoocksFirstMove(false, false)
+                && board.isEmpty(96)
+                && board.isEmpty(97)) {
+            return 98;
+        }
+        return -1;
     }
 
     private void initializeEngine() {

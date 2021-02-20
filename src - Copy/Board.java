@@ -1,23 +1,14 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class Board {
     private static Board instance = null;
     private List<Integer> board;
     private boolean isBlackOnTop;
-    private StateVariables stateVariables;
 
     private Board() {
         board = new ArrayList<Integer>(120);
-        stateVariables = new StateVariables();
-    }
-
-    public List<Integer> getBoard() {
-        return board;
-    }
-
-    public void setBoard(List<Integer> b) {
-        board = b;
     }
 
     void initializeBoard() {
@@ -131,69 +122,26 @@ class Board {
         }
     }
 
-    public boolean isKingsFirstMove(boolean isBlack) {
-        return stateVariables.isKingsFirstMove(isBlack);
-    }
-
-    public void setKingsFirstMove(boolean kingsFirstMove, boolean isBlack) {
-        stateVariables.setKingsFirstMove(kingsFirstMove, isBlack);
-    }
-
-    public boolean isRoocksFirstMove(boolean isBlack, boolean isLeft) {
-        return stateVariables.isRoocksFirstMove(isBlack, isLeft);
-    }
-
-    public void setRoocksFirstMove(boolean roocksFirstMove, boolean isBlack, boolean isLeft) {
-       stateVariables.setRoocksFirstMove(roocksFirstMove, isBlack, isLeft);
-    }
-
-    String castlingMove(String move) {
-        try {
-            int char1 = Integer.parseInt(String.valueOf(move.charAt(1)));
-            int char3 = Integer.parseInt(String.valueOf(move.charAt(3)));
-            int current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
-            int next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
-            next = current - next;
-
-            if (isKing(current) && isRoock(next)) {
-                if (current < next) {
-                   next -= 1;
-                } else {
-                    next +=1;
-                }
-                MoveGenerator mv = MoveGenerator.getInstance();
-                move = mv.getMove(current, next);
-            }
-
-            return move;
-
-        } catch (StringIndexOutOfBoundsException e) {
-            System.out.println(move);
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     void movePiece(String move) {
         try {
             int current, next;
             int char1 = Integer.parseInt(String.valueOf(move.charAt(1)));
             int char3 = Integer.parseInt(String.valueOf(move.charAt(3)));
-            current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
-            next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
-            next = current - next;
+            if (isBlackOnTop) {
+                current = 20 + (8 - char1) * 10 + (move.charAt(0) - 96);
+                next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
+                next = current - next;
 
+                board.set(next, board.get(current));
+                board.set(current, Constants.E);
+            } else {
+                current = 20 + (char1 - 1) * 10 + (105 - move.charAt(0));
+                next = (char3 - char1) * 10 - (move.charAt(2) - move.charAt(0));
+                next = current - next;
 
-            movePiece(current, next);
-//            board.set(next, board.get(current));
-//            if (move.matches("^[a-h]\\d[a-h]\\d" + "q")) {
-//                if (isWhite(current)) {
-//                    board.set(next, Constants.wQ);
-//                } else {
-//                    board.set(next, Constants.bQ);
-//                }
-//            }
-//            board.set(current, Constants.E);
+                board.set(next, board.get(current));
+                board.set(current, Constants.E);
+            }
         } catch (StringIndexOutOfBoundsException e) {
             System.out.println(move);
             e.printStackTrace();
@@ -201,39 +149,71 @@ class Board {
     }
 
     void movePiece(int current, int next) {
-        if (isKing(current) && isRoock(next)) {
-            if (current < next) {
-                board.set(next - 1, board.get(current));
-                board.set(current, Constants.E);
-                board.set(next - 2, board.get(next));
-                board.set(next, Constants.E);
-            } else {
-                board.set(next + 1, board.get(current));
-                board.set(current, Constants.E);
-                board.set(next + 2, board.get(next));
-                board.set(next, Constants.E);
-            }
-            return;
-        }
-
         board.set(next, board.get(current));
-        if (board.get(current) == Constants.wP && next < 29) {
-            board.set(next, Constants.wQ);
-        } else if (board.get(current) == Constants.bP && next > 90) {
-            board.set(next, Constants.bQ);
-        }
-
         board.set(current, Constants.E);
     }
 
-    void setPiece(int index, int piece) {
-        board.set(index, piece);
-    }
-
-    void moveBack(int current, int next) {
-        int aux = next;
-        board.set(next, board.get(current));
-        board.set(current, board.get(aux));
+    void changePiecesColor() {
+        for (int i = 21; i < 99; i++) {
+            // black to white
+            if (board.get(i) == Constants.bR) {
+                board.set(i, Constants.wR);
+                continue;
+            }
+            if (board.get(i) == Constants.bK) {
+                board.set(i, Constants.wK);
+                continue;
+            }
+            if (board.get(i) == Constants.bB) {
+                board.set(i, Constants.wB);
+                continue;
+            }
+            if (board.get(i) == Constants.bQ) {
+                board.set(i, Constants.wQ);
+                continue;
+            }
+            if (board.get(i) == Constants.bK) {
+                board.set(i, Constants.wK);
+                continue;
+            }
+            if (board.get(i) == Constants.bP) {
+                board.set(i, Constants.wP);
+                continue;
+            }
+            if (board.get(i) == Constants.bN) {
+                board.set(i, Constants.wN);
+                continue;
+            }
+            // white to black
+            if (board.get(i) == Constants.wR) {
+                board.set(i, Constants.bR);
+                continue;
+            }
+            if (board.get(i) == Constants.wK) {
+                board.set(i, Constants.bK);
+                continue;
+            }
+            if (board.get(i) == Constants.wB) {
+                board.set(i, Constants.bB);
+                continue;
+            }
+            if (board.get(i) == Constants.wQ) {
+                board.set(i, Constants.bQ);
+                continue;
+            }
+            if (board.get(i) == Constants.wK) {
+                board.set(i, Constants.bK);
+                continue;
+            }
+            if (board.get(i) == Constants.wP) {
+                board.set(i, Constants.bP);
+                continue;
+            }
+            if (board.get(i) == Constants.wN) {
+                board.set(i, Constants.bN);
+                continue;
+            }
+        }
     }
 
    public int getPiece(int index) {
@@ -282,13 +262,5 @@ class Board {
 
     public boolean isKing(int index) {
         return (board.get(index) == Constants.wK) || (board.get(index) == Constants.bK);
-    }
-
-    public StateVariables getStateVariables() {
-        return stateVariables;
-    }
-
-    public void setStateVariables(StateVariables stateVariables) {
-        this.stateVariables = stateVariables;
     }
 }

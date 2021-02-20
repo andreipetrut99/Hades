@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -11,8 +12,8 @@ public class Main {
         boolean forceMode = false;
         String onMove = "white", mode;
         String playingColor = "black";
+        String onTopPlayer = "black";
         writer.flush();
-
         while (true) {
             command = reader.readLine();
             switch (command) {
@@ -24,6 +25,8 @@ public class Main {
                     board.initializeBoard();
                     forceMode = false;
                     playingColor = "black";
+                    onTopPlayer = "black";
+                    board.setBlackOnTop(true);
                     onMove = "white";
                     break;
                 case "force":
@@ -36,22 +39,29 @@ public class Main {
                 case "white":
                     onMove = "white";
                     playingColor = "black";
+                    if (onTopPlayer.equals("black")) {
+                        board.changePiecesColor();
+                        onTopPlayer = "white";
+                        board.setBlackOnTop(false);
+                    }
                     break;
                 case "black":
                     onMove = "black";
                     playingColor = "white";
+                    if (onTopPlayer.equals("white")) {
+                        board.changePiecesColor();
+                        onTopPlayer = "black";
+                        board.setBlackOnTop(true);
+                    }
                     break;
                 case "quit":
                     return;
                 case "print":
                     board.printBoard();
                     break;
-                case "bishop":
-                    engine.getBishopMoves(Constants.wB, 93);
             }
 
-            if ((command.matches("^[a-h]\\d[a-h]\\d") && !forceMode) || command.equals("go")
-                    || command.matches("^[a-h]\\d[a-h]\\d" + "q")) {
+            if ((command.matches("^[a-h]\\d[a-h]\\d") && !forceMode) || command.equals("go")) {
                 String move;
                 if (!command.equals("go")) {
                     board.movePiece(command);
@@ -66,9 +76,8 @@ public class Main {
                 if (move.equals("resign")) {
                     writer.println(move);
                 } else {
-                    String move1 = board.castlingMove(move);
                     board.movePiece(move);
-                    writer.println("move " + move1);
+                    writer.println("move " + move);
                 }
 
             } else if (command.matches("^[a-h]\\d[a-h]\\d") && forceMode) {
@@ -80,6 +89,9 @@ public class Main {
                 board.movePiece(command);
             }
 
+            if (command.matches("[a-h]\\d[a-h]\\d[q-r]")) {
+                writer.write("resign");
+            }
 
             writer.flush();
         }
